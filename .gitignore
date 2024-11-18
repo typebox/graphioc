@@ -1,0 +1,24 @@
+# Dependency directories
+deno_modules/
+
+# Deno's cache directory
+.deno/
+
+# Environment variables
+.env
+
+# Compiled output
+*.js
+*.js.map
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
