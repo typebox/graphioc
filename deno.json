@@ -1,4 +1,7 @@
 {
+  "name": "@typebox/graphioc",
+  "version": "0.1.0",
+  "exports": "./src/mod.ts",
   "tasks": {
     "dev": "deno run --watch main.ts"
   },
