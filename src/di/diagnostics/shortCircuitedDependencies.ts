@@ -1,7 +1,5 @@
-
 import { Constructor, Registration } from "../container.ts";
 import { DiagnosticRule } from "./diagnosticRule.ts";
-import { Reflect } from "jsr:@dx/reflect";
 
 export class ShortCircuitedDependencies extends DiagnosticRule {
     constructor(private registrations: Map<Constructor<unknown>, Registration<unknown>>) {

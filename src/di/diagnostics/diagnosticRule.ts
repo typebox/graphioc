@@ -1,5 +1,5 @@
 import {Constructor} from "../container.ts";
-import {Reflect} from "jsr:@dx/reflect";
+import {Reflect} from "@dx/reflect";
 
 export abstract class DiagnosticRule {
     abstract name: string;

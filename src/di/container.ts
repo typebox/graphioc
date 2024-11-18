@@ -1,4 +1,4 @@
-import {Reflect} from "jsr:@dx/reflect";
+import {Reflect} from "@dx/reflect";
 import {lifestyleMismatch} from "./diagnostics/lifestyleMismatch.ts";
 import type { DiagnosticRule } from "./diagnostics/diagnosticRule.ts";
 import {UnregisteredDependencies} from "./diagnostics/unregisteredDependencies.ts";
@@ -83,7 +83,7 @@ export class Container {
         return this.createInstance(registration.implementation) as T;
     }
 
-    getRegistration<T>(constructor: Constructor<T>) {
+    getRegistration<T>(constructor: Constructor<T>): Registration<unknown> {
         const registration = this.registrations.get(constructor);
         if (!registration) {
 

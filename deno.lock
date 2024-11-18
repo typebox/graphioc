@@ -2,6 +2,7 @@
   "version": "4",
   "specifiers": {
     "jsr:@dx/reflect@*": "0.2.14",
+    "jsr:@dx/reflect@~0.2.14": "0.2.14",
     "jsr:@std/assert@*": "1.0.6",
     "jsr:@std/assert@1": "1.0.6",
     "jsr:@std/internal@^1.0.4": "1.0.4"
@@ -22,6 +23,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@dx/reflect@~0.2.14",
       "jsr:@std/assert@1"
     ]
   }
