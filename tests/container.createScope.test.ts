@@ -3,7 +3,7 @@ import {
     assertEquals,
     assertInstanceOf
 } from "jsr:@std/assert";
-import {Container, Injectable, LifeStyles} from "../src/di/container.ts";
+import {Container, Injectable, LifeStyles} from "../src/Container.ts";
 
 Deno.test("Scoped Container and parent container are different", () => {
     //Assign

@@ -1,1 +1,1 @@
-export * from "./di/container.ts";
+export * from "./Container.ts";

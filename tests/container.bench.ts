@@ -1,4 +1,4 @@
-import { Container, Injectable, LifeStyles } from "../src/di/container.ts";
+import { Container, Injectable, LifeStyles } from "../src/Container.ts";
 
 
 @Injectable()

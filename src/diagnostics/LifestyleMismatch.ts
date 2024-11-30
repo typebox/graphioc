@@ -1,33 +1,30 @@
-import { Constructor, LifeStyles, type LifeStyleType, type Registration } from "../container.ts";
-import {DiagnosticRule} from "./diagnosticRule.ts";
+import { type Constructor, LifeStyles, type LifeStyleType, type Registration } from "../Container.ts";
+import {DiagnosticRule} from "./DiagnosticRule.ts";
 
 export class lifestyleMismatch extends DiagnosticRule{
 
     constructor(private registrations: Map<Constructor<unknown>, Registration<unknown>>) {
       super();
     }
-    Verify(): string[] {
-        const warnings: string[] = [];
-        const visited = new Set<Constructor<unknown>>();
 
+    visited = new Set<Constructor<unknown>>()
+
+    Verify() {
         for (const [constructor, registration] of this.registrations.entries()) {
-            this.analyzeLifestyleMismatches(constructor, registration, [], warnings, visited);
+            this.analyzeLifestyleMismatches(constructor, registration, []);
         }
 
-        return warnings;
     }
 
     private analyzeLifestyleMismatches(
         constructor: Constructor<unknown>,
         registration: Registration<unknown>,
         path: Constructor<unknown>[],
-        warnings: string[],
-        visited: Set<Constructor<unknown>>
     ) {
-        if (visited.has(constructor)) {
+        if (this.visited.has(constructor)) {
             return;
         }
-        visited.add(constructor);
+        this.visited.add(constructor);
 
         const dependencies = this.getDependencies(registration.implementation);
 
@@ -39,7 +36,7 @@ export class lifestyleMismatch extends DiagnosticRule{
             }
 
             if (this.isLifestyleMismatch(registration.lifestyle, depRegistration.lifestyle)) {
-                warnings.push(
+                this.warnings.push(
                     `Lifestyle mismatch detected: ${registration.implementation.name} (${registration.lifestyle}) depends on ` +
                     `${depRegistration.implementation.name} (${depRegistration.lifestyle})`
                 );
@@ -48,9 +45,7 @@ export class lifestyleMismatch extends DiagnosticRule{
             this.analyzeLifestyleMismatches(
                 dependency,
                 depRegistration,
-                path.concat(constructor),
-                warnings,
-                visited
+                path.concat(constructor)
             );
         }
     }

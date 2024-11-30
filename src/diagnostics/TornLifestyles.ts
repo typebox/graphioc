@@ -1,6 +1,5 @@
-// tornLifestyles.ts
-import { Constructor, Registration, LifeStyles } from "../container.ts";
-import { DiagnosticRule } from "./diagnosticRule.ts";
+import { type Constructor, type Registration, LifeStyles } from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class TornLifestyles extends DiagnosticRule {
     constructor(
@@ -16,14 +15,14 @@ export class TornLifestyles extends DiagnosticRule {
     Verify(): string[] {
         const warnings: string[] = [];
 
-        for (const [constructor, registration] of this.registrations.entries()) {
+        for (const [_constructor, registration] of this.registrations.entries()) {
             if (registration.lifestyle === LifeStyles.Singleton || registration.lifestyle === LifeStyles.Scoped) {
                 const instance1 = this.createInstance(registration.implementation);
                 const instance2 = this.createInstance(registration.implementation);
 
                 if (instance1 !== instance2) {
                     warnings.push(
-                        `Torn lifestyle detected: Multiple instances of ${registration.implementation.name} are created despite being registered as ${registration.lifestyle}.`
+                        `Multiple instances of ${registration.implementation.name} are created despite being registered as ${registration.lifestyle}`
                     );
                 }
             }

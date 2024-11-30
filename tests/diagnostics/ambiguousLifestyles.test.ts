@@ -1,5 +1,6 @@
 import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles} from "../../src/di/container.ts";
+import { Container, Injectable, LifeStyles } from "../../src/mod.ts";
+import { assertValidationWarning } from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for AmbiguousLifestyles", () => {
@@ -11,14 +12,8 @@ Deno.test("Diagnostics for AmbiguousLifestyles", () => {
     container.register(AmbiguousService, LifeStyles.Transient);
     container.register(AmbiguousService, LifeStyles.Singleton);
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for AmbiguousLifestyles:\nAmbiguous lifestyles detected: AmbiguousService is registered with multiple lifestyles (Transient, Singleton).",
-        "Should throw an error when resolving an unregistered service"
-    );
-
+    // Act & Assert
+    const warning = "AmbiguousService is registered with multiple lifestyles (Transient, Singleton)";
+    const validatorName = "AmbiguousLifestyles";
+    assertValidationWarning(container, validatorName, warning);
 });

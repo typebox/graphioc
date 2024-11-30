@@ -1,5 +1,5 @@
-import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles, type Constructor} from "../../src/di/container.ts";
+import {type Constructor, Injectable, LifeStyles, Container} from "../../src/Container.ts";
+import { assertValidationWarning } from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for TornLifestyles", () => {
@@ -16,14 +16,9 @@ Deno.test("Diagnostics for TornLifestyles", () => {
         return new constructor();
     };
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for TornLifestyles:\nUnregistered dependency: ServiceB required by Torn lifestyle detected: Multiple instances of SingletonService are created despite being registered as Singleton.",
-        "Should throw an error when resolving an unregistered service"
-    );
+    // Act Assert
+    const warning = "Multiple instances of SingletonService are created despite being registered as Singleton";
+    const validatorName = "TornLifestyles";
+    assertValidationWarning(container, validatorName, warning);
 
 });

@@ -1,5 +1,5 @@
-import {Constructor, LifeStyles, type Registration} from "../container.ts";
-import { DiagnosticRule } from "./diagnosticRule.ts";
+import {type Constructor, LifeStyles, type Registration} from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 
 export class DisposableTransientComponents extends DiagnosticRule {
@@ -7,18 +7,15 @@ export class DisposableTransientComponents extends DiagnosticRule {
       super();
     }
 
-    Verify(): string[] {
-        const warnings: string[] = [];
-
-        for (const [constructor, registration] of this.registrations.entries()) {
+    Verify() {
+        for (const [_constructor, registration] of this.registrations.entries()) {
             if (registration.lifestyle === LifeStyles.Transient && this.isDisposable(registration.implementation)) {
-                warnings.push(
-                    `Disposable transient component detected: ${registration.implementation.name} is transient and implements a dispose method.`
+                this.warnings.push(
+                    `Disposable transient component detected: ${registration.implementation.name} is transient and implements a dispose method`
                 );
             }
         }
 
-        return warnings;
     }
 
     private isDisposable<T>(constructor: Constructor<T>): boolean {

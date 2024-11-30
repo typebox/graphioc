@@ -1,27 +1,21 @@
-import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles, type Constructor} from "../../src/di/container.ts";
-
+import { Container, Injectable, LifeStyles } from "../../src/Container.ts";
+import {assertValidationWarning} from "./assertValidationWarning.ts";
 
 Deno.test("Diagnostics for UnregisteredDependencies", () => {
 
-    class ServiceB {}
+    // Assign
+    class _ServiceB {}
 
     @Injectable()
     class ServiceA {
-        constructor(public serviceB: ServiceB) {}
+        constructor(public serviceB: _ServiceB) {}
     }
 
     const container = new Container();
     container.register(ServiceA, LifeStyles.Transient);
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for UnregisteredDependencies:\nUnregistered dependency: ServiceB required by ServiceA",
-        "Should throw an error when resolving an unregistered service"
-    );
-
+    // Act Assert
+    const warning = "_ServiceB required by ServiceA has not been registered with the container";
+    const validatorName = "UnregisteredDependencies";
+    assertValidationWarning(container, validatorName, warning);
 });

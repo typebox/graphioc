@@ -1,29 +1,28 @@
-import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles} from "../../src/di/container.ts";
+import {Container, Injectable, LifeStyles} from "../../src/Container.ts";
+import {assertValidationWarning} from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for ShortCircuitedDependencies", () => {
-    //Assign
+    // Assign
+    const IServiceB: unique symbol = Symbol("IServiceB");
+    // deno-lint-ignore no-empty-interface
+    interface IServiceB {}
+
+    @Injectable(IServiceB)
+    class ServiceB implements IServiceB {}
+
     @Injectable()
     class ServiceA {
-        constructor(public serviceB?: ServiceB) {}
+        constructor(public serviceB: ServiceB) {}
     }
 
-    class ServiceB {}
-
-    // Registration
     const container = new Container();
+    container.register<IServiceB>(ServiceB, LifeStyles.Singleton);
     container.register(ServiceA, LifeStyles.Transient);
-    // Note: ServiceB is not registered
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for ShortCircuitedDependencies:\nUnregistered dependency: ServiceB required by ServiceA",
-        "Should throw an error when resolving an unregistered service"
-    );
+    // Act & Assert
+    const warning = "ServiceA (Transient) depends on ServiceB (Transient) instead of the registered abstraction IServiceB (Singleton)";
+    const validatorName = "ShortCircuitedDependencies";
+    assertValidationWarning(container, validatorName, warning);
 
 });

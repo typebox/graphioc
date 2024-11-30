@@ -1,15 +1,18 @@
 import {Reflect} from "@dx/reflect";
-import {lifestyleMismatch} from "./diagnostics/lifestyleMismatch.ts";
-import type { DiagnosticRule } from "./diagnostics/diagnosticRule.ts";
-import {UnregisteredDependencies} from "./diagnostics/unregisteredDependencies.ts";
-import { DisposableTransientComponents } from "./diagnostics/disposableTransientComponents.ts";
-import {ShortCircuitedDependencies} from "./diagnostics/shortCircuitedDependencies.ts";
-import { TornLifestyles } from "./diagnostics/tornLifestyles.ts";
-import { AmbiguousLifestyles } from "./diagnostics/ambiguousLifestyles.ts";
+import {lifestyleMismatch} from "./diagnostics/LifestyleMismatch.ts";
+import type { DiagnosticRule } from "./diagnostics/DiagnosticRule.ts";
+import {UnregisteredDependencies} from "./diagnostics/UnregisteredDependencies.ts";
+import { DisposableTransientComponents } from "./diagnostics/DisposableTransientComponents.ts";
+import {ShortCircuitedDependencies} from "./diagnostics/ShortCircuitedDependencies.ts";
+import { TornLifestyles } from "./diagnostics/TornLifestyles.ts";
+import { AmbiguousLifestyles } from "./diagnostics/AmbiguousLifestyles.ts";
+import { VerificationError } from "./diagnostics/VerificationError.ts";
+
 
 // deno-lint-ignore no-explicit-any
 export type Constructor<T> = new (...args: any[]) => T;
 
+export const metadata_contacts_key = "di:metadata:contacts";
 export const LifeStyles = {
     Singleton: 'Singleton',
     Transient: 'Transient',
@@ -28,7 +31,6 @@ export class Container {
     private diagnostics: DiagnosticRule[] = [];
 
     constructor() {
-        // Initialize diagnostic rules
         this.diagnostics.push(new lifestyleMismatch(this.registrations));
         this.diagnostics.push(new ShortCircuitedDependencies(this.registrations));
         this.diagnostics.push(new TornLifestyles(this.registrations, (ctor) => this.createInstance(ctor)));
@@ -38,18 +40,17 @@ export class Container {
     }
 
     Verify() {
-        const warnings: string[] = [];
+        const diagnosticRulesWithWarnings: DiagnosticRule[] = [];
 
         for (const rule of this.diagnostics) {
-            const ruleWarnings = rule.Verify();
-            if (ruleWarnings.length > 0) {
-                warnings.push(`Diagnostics for ${rule.name}:`);
-                warnings.push(...ruleWarnings);
+            rule.Verify();
+            if (rule.warnings.length > 0) {
+                diagnosticRulesWithWarnings.push(rule);
             }
         }
 
-        if (warnings.length > 0) {
-            throw new Error('Verification failed:\n' + warnings.join('\n'));
+        if (diagnosticRulesWithWarnings.length > 0) {
+            throw new VerificationError(diagnosticRulesWithWarnings);
         }
     }
     private registrations = new Map<Constructor<unknown>, Registration<unknown>>();
@@ -57,11 +58,11 @@ export class Container {
 
     register<T>(
         implementation: Constructor<T>,
-        lifestyle: LifeStyleType = "Transient",
+        lifestyle: LifeStyleType = LifeStyles.Transient,
     ): void {
         this.registrations.set(implementation, { implementation, lifestyle });
 
-        const interfaces: symbol[] = Reflect.getMetadata("di:metadata:interfaces", implementation) || [];
+        const interfaces: symbol[] = Reflect.getMetadata(metadata_contacts_key, implementation) || [];
         interfaces.forEach(i => {
             if (!this.interfaceMap.has(i)) {
                 this.interfaceMap.set(i, []);
@@ -140,8 +141,8 @@ class ScopedContainer extends Container {
 
 }
 
-export function Injectable<T>(...interfaces: symbol[]): (Type: Constructor<T>) => void {
+export function Injectable<T>(...contacts: symbol[]): (Type: Constructor<T>) => void {
     return function (Type: Constructor<T>): void {
-        Reflect.defineMetadata('di:metadata:interfaces', interfaces, Type);
+        Reflect.defineMetadata(metadata_contacts_key, contacts, Type);
     };
 }

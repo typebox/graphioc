@@ -1,5 +1,6 @@
 import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles} from "../../src/di/container.ts";
+import {Container, Injectable, LifeStyles} from "../../src/Container.ts";
+import {assertValidationWarning} from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for DisposableTransientComponents", () => {
@@ -14,14 +15,10 @@ Deno.test("Diagnostics for DisposableTransientComponents", () => {
     const container = new Container();
     container.register(DisposableTransientService, LifeStyles.Transient);
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for DisposableTransientComponents:\nDisposable transient component detected: DisposableTransientService is transient and implements a dispose method.",
-        "Should throw an error when resolving an unregistered service"
-    );
+
+    // Act & Assert
+    const warning = "DisposableTransientService is transient and implements a dispose method";
+    const validatorName = "DisposableTransientComponents";
+    assertValidationWarning(container, validatorName, warning);
 
 });

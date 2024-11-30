@@ -1,5 +1,6 @@
 import { assertThrows } from "@std/assert";
-import {Container, Injectable, LifeStyles} from "../../src/di/container.ts";
+import {Container, Injectable, LifeStyles} from "../../src/Container.ts";
+import {assertValidationWarning} from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for LifestyleMismatch", () => {
@@ -15,14 +16,9 @@ Deno.test("Diagnostics for LifestyleMismatch", () => {
     container.register(Foo, LifeStyles.Transient);
     container.register(Bah, LifeStyles.Singleton);
 
-    //Act Assert
-    assertThrows(
-        () => {
-            container.Verify();
-        },
-        Error,
-        "Verification failed:\nDiagnostics for LifestyleMismatch:\nLifestyle mismatch detected: Bah (Singleton) depends on Foo (Transient)",
-        "Should throw an error when resolving an unregistered service"
-    );
+    // Act & Assert
+    const warning = "Bah (Singleton) depends on Foo (Transient)";
+    const validatorName = "LifestyleMismatch";
+    assertValidationWarning(container, validatorName, warning);
 
 });
