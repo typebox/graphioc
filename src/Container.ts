@@ -8,7 +8,6 @@ import { TornLifestyles } from "./diagnostics/TornLifestyles.ts";
 import { AmbiguousLifestyles } from "./diagnostics/AmbiguousLifestyles.ts";
 import { VerificationError } from "./diagnostics/VerificationError.ts";
 
-
 // deno-lint-ignore no-explicit-any
 export type Constructor<T> = new (...args: any[]) => T;
 
@@ -28,21 +27,31 @@ export interface Registration<T> {
 }
 
 export class Container {
-    private diagnostics: DiagnosticRule[] = [];
+    private readonly diagnosticRules: DiagnosticRule[] = [];
+    private readonly registrations = new Map<Constructor<unknown>, Registration<unknown>>();
+    private readonly interfaceMap = new Map<symbol, Constructor<unknown>[]>();
+    private readonly lifestyleMismatch = new lifestyleMismatch(this.registrations);
+    private readonly shortCircuitedDependencies = new ShortCircuitedDependencies(this.registrations);
+    private readonly tornLifestyles = new TornLifestyles(this.registrations, (ctor) => this.createInstance(ctor));
+    private readonly ambiguousLifestyles = new AmbiguousLifestyles();
+    private readonly disposableTransientComponents = new DisposableTransientComponents(this.registrations);
+    private readonly unregisteredDependencies = new UnregisteredDependencies(this.registrations);
 
     constructor() {
-        this.diagnostics.push(new lifestyleMismatch(this.registrations));
-        this.diagnostics.push(new ShortCircuitedDependencies(this.registrations));
-        this.diagnostics.push(new TornLifestyles(this.registrations, (ctor) => this.createInstance(ctor)));
-        this.diagnostics.push(new AmbiguousLifestyles(this.registrations));
-        this.diagnostics.push(new DisposableTransientComponents(this.registrations));
-        this.diagnostics.push(new UnregisteredDependencies(this.registrations));
+        this.diagnosticRules = [
+            this.lifestyleMismatch,
+            this.shortCircuitedDependencies,
+            this.tornLifestyles,
+            this.ambiguousLifestyles,
+            this.disposableTransientComponents,
+            this.unregisteredDependencies
+        ];
     }
 
     Verify() {
         const diagnosticRulesWithWarnings: DiagnosticRule[] = [];
 
-        for (const rule of this.diagnostics) {
+        for (const rule of this.diagnosticRules) {
             rule.Verify();
             if (rule.warnings.length > 0) {
                 diagnosticRulesWithWarnings.push(rule);
@@ -53,13 +62,12 @@ export class Container {
             throw new VerificationError(diagnosticRulesWithWarnings);
         }
     }
-    private registrations = new Map<Constructor<unknown>, Registration<unknown>>();
-    private interfaceMap = new Map<symbol, Constructor<unknown>[]>();
 
     register<T>(
         implementation: Constructor<T>,
         lifestyle: LifeStyleType = LifeStyles.Transient,
     ): void {
+        this.ambiguousLifestyles.trackRegistration(implementation, lifestyle)
         this.registrations.set(implementation, { implementation, lifestyle });
 
         const interfaces: symbol[] = Reflect.getMetadata(metadata_contacts_key, implementation) || [];

@@ -1,4 +1,3 @@
-import { assertThrows } from "@std/assert";
 import { Container, Injectable, LifeStyles } from "../../src/mod.ts";
 import { assertValidationWarning } from "./assertValidationWarning.ts";
 
