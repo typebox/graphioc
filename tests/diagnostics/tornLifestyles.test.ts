@@ -1,24 +1,26 @@
-import {type Constructor, Injectable, LifeStyles, Container} from "../../src/Container.ts";
+import { type Constructor, Injectable, LifeStyles, Container } from "../../src/Container.ts";
 import { assertValidationWarning } from "./assertValidationWarning.ts";
 
-
 Deno.test("Diagnostics for TornLifestyles", () => {
-    // Test classes
+    // Assign
+
     @Injectable()
     class SingletonService {}
 
-    // Simulate multiple registrations or misconfiguration
+    // Simulate misconfiguration where singleton service resolves to multiple instances
     const container = new Container();
     container.register(SingletonService, LifeStyles.Singleton);
 
-    // Modify createInstance to always create a new instance (simulate misconfiguration)
+    // Override createInstance to always create a new instance (simulate misconfiguration)
     container['createInstance'] = function<T>(constructor: Constructor<T>): T {
+        // Do not set the instance on the registration to simulate the singleton not being cached
         return new constructor();
     };
 
-    // Act Assert
-    const warning = "Multiple instances of SingletonService are created despite being registered as Singleton";
+    // Act & Assert
+    const warning = "Singleton service 'SingletonService' is resolving to multiple instances.";
     const validatorName = "TornLifestyles";
-    assertValidationWarning(container, validatorName, warning);
 
+    // Verify that the diagnostic rule reports the expected warning
+    assertValidationWarning(container, validatorName, warning);
 });

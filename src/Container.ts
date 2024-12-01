@@ -1,17 +1,20 @@
-import {Reflect} from "@dx/reflect";
-import {lifestyleMismatch} from "./diagnostics/LifestyleMismatch.ts";
 import type { DiagnosticRule } from "./diagnostics/DiagnosticRule.ts";
-import {UnregisteredDependencies} from "./diagnostics/UnregisteredDependencies.ts";
+import { Reflect } from "@dx/reflect";
+import { lifestyleMismatch } from "./diagnostics/LifestyleMismatch.ts";
+import { UnregisteredDependencies } from "./diagnostics/UnregisteredDependencies.ts";
 import { DisposableTransientComponents } from "./diagnostics/DisposableTransientComponents.ts";
-import {ShortCircuitedDependencies} from "./diagnostics/ShortCircuitedDependencies.ts";
+import { ShortCircuitedDependencies } from "./diagnostics/ShortCircuitedDependencies.ts";
 import { TornLifestyles } from "./diagnostics/TornLifestyles.ts";
 import { AmbiguousLifestyles } from "./diagnostics/AmbiguousLifestyles.ts";
 import { VerificationError } from "./diagnostics/VerificationError.ts";
 
+// using any is justified here as the container
 // deno-lint-ignore no-explicit-any
 export type Constructor<T> = new (...args: any[]) => T;
 
 export const metadata_contacts_key = "di:metadata:contacts";
+export const design_paramtypes = "design:paramtypes";
+
 export const LifeStyles = {
     Singleton: 'Singleton',
     Transient: 'Transient',
@@ -27,12 +30,18 @@ export interface Registration<T> {
 }
 
 export class Container {
-    private readonly diagnosticRules: DiagnosticRule[] = [];
+
+    //tracks the registrations into the container mainly to know what the lifestyle
     private readonly registrations = new Map<Constructor<unknown>, Registration<unknown>>();
+
+    // This keeps track of the interfaces and their concrete implementations
     private readonly interfaceMap = new Map<symbol, Constructor<unknown>[]>();
+
+    // these are all the diagnostic rules that are applied to the container
+    private readonly diagnosticRules: DiagnosticRule[] = [];
     private readonly lifestyleMismatch = new lifestyleMismatch(this.registrations);
     private readonly shortCircuitedDependencies = new ShortCircuitedDependencies(this.registrations);
-    private readonly tornLifestyles = new TornLifestyles(this.registrations, (ctor) => this.createInstance(ctor));
+    private readonly tornLifestyles = new TornLifestyles(this.registrations, this);
     private readonly ambiguousLifestyles = new AmbiguousLifestyles();
     private readonly disposableTransientComponents = new DisposableTransientComponents(this.registrations);
     private readonly unregisteredDependencies = new UnregisteredDependencies(this.registrations);
@@ -63,10 +72,7 @@ export class Container {
         }
     }
 
-    register<T>(
-        implementation: Constructor<T>,
-        lifestyle: LifeStyleType = LifeStyles.Transient,
-    ): void {
+    register<T>( implementation: Constructor<T>, lifestyle: LifeStyleType = LifeStyles.Transient,): void {
         this.ambiguousLifestyles.trackRegistration(implementation, lifestyle)
         this.registrations.set(implementation, { implementation, lifestyle });
 
@@ -113,7 +119,7 @@ export class Container {
     }
 
     protected createInstance<T>(constructor: Constructor<T>): T {
-        const paramTypes = Reflect.getMetadata("design:paramtypes", constructor) || [];
+        const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) || [];
         const parameters = paramTypes.map((param: Constructor<unknown>) => this.resolve(param));
         return new constructor(...parameters);
     }
@@ -137,16 +143,15 @@ class ScopedContainer extends Container {
     override resolve<T>(constructor: Constructor<T>): T {
         const registration = this.superContainer.getRegistration(constructor);
 
-        if (registration.lifestyle === LifeStyles.Scoped) {
+        if (registration.lifestyle !== LifeStyles.Scoped) {
+            return this.superContainer.resolve(constructor);
+        } else {
             if (!this.scopedInstances.has(constructor)) {
                 this.scopedInstances.set(constructor, this.createInstance(registration.implementation));
             }
             return this.scopedInstances.get(constructor) as T;
         }
-
-        return this.superContainer.resolve(constructor);
     }
-
 }
 
 export function Injectable<T>(...contacts: symbol[]): (Type: Constructor<T>) => void {
