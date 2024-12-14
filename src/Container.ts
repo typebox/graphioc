@@ -149,18 +149,25 @@ export class Container {
   protected createInstance<T>(constructor: Constructor<T>): T {
     const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
       [];
+    const dependencyCache = new Map<Constructor<unknown>, unknown>();
+
     try {
       const parameters = paramTypes.map((param: Constructor<unknown>) => {
-        try {
-          return this.resolve(param);
-        } catch (error) {
-          if (error instanceof Error) {
-            throw new Error(
-              `Failed to resolve parameter ${param.name}: ${error.message}`,
-            );
+        if (!dependencyCache.has(param)) {
+          try {
+            const resolvedParam = this.resolve(param);
+            dependencyCache.set(param, resolvedParam);
+            return resolvedParam;
+          } catch (error) {
+            if (error instanceof Error) {
+              throw new Error(
+                `Failed to resolve parameter ${param.name}: ${error.message}`,
+              );
+            }
+            throw error;
           }
-          throw error;
         }
+        return dependencyCache.get(param);
       });
       return new constructor(...parameters);
     } catch (error) {
