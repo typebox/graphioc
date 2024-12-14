@@ -140,7 +140,13 @@ export class Container {
 
   protected isInstantiable<T>(constructor: Constructor<T>): boolean {
     try {
-      return !!constructor.prototype;
+      if (!constructor.prototype) return false;
+      const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
+        [];
+      if (!Array.isArray(paramTypes)) return false;
+      return paramTypes.every(
+        (param) => param instanceof Function && param.prototype !== undefined,
+      );
     } catch {
       return false;
     }
