@@ -122,7 +122,7 @@ export class Container {
   getRegistration<T>(constructor: Constructor<T>): Registration<unknown> {
     const registration = this.registrations.get(constructor);
     if (!registration) {
-      if (new constructor() instanceof Object) {
+      if (this.isInstantiable(constructor)) {
         const newRegistration: Registration<T> = {
           lifestyle: LifeStyles.Transient,
           implementation: constructor,
@@ -136,6 +136,14 @@ export class Container {
     }
 
     return registration;
+  }
+
+  protected isInstantiable<T>(constructor: Constructor<T>): boolean {
+    try {
+      return !!constructor.prototype;
+    } catch {
+      return false;
+    }
   }
 
   protected createInstance<T>(constructor: Constructor<T>): T {
