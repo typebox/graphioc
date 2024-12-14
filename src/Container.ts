@@ -132,7 +132,12 @@ export class Container {
         return newRegistration;
       }
 
-      throw new Error(`Service not registered: ${constructor.name}`);
+      throw new Error(
+        `Service not registered: ${constructor.name}. ` +
+          `Ensure the service is registered before resolving. Caller: ${
+            new Error().stack
+          }`,
+      );
     }
 
     return registration;
