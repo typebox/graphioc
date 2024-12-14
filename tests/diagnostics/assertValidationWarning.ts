@@ -1,34 +1,36 @@
-import { assertInstanceOf } from "@std/assert";
-import type {Container} from "../../src/Container.ts";
-import {VerificationError} from "../../src/diagnostics/VerificationError.ts";
-import { assert, assertExists } from "@std/assert";
+import { assertInstanceOf } from '@std/assert';
+import type { Container } from '../../src/Container.ts';
+import { VerificationError } from '../../src/diagnostics/VerificationError.ts';
+import { assert, assertExists } from '@std/assert';
 
-export function assertValidationWarning(container: Container, validatorName: string, warning?: string) {
-    try {
-        container.Verify();
-    } catch (e) {
-        assertInstanceOf(e, VerificationError)
-        const diagnosticRule = e.diagnosticRulesWithWarnings
-            .find(w => {
+export function assertValidationWarning(
+  container: Container,
+  validatorName: string,
+  warning?: string,
+) {
+  try {
+    container.Verify();
+  } catch (e) {
+    assertInstanceOf(e, VerificationError);
+    const diagnosticRule = e.diagnosticRulesWithWarnings
+      .find((w) => {
+        return w.name === validatorName;
+      });
 
-                return w.name === validatorName;
-            });
+    //
+    if (!diagnosticRule) return;
 
-        //
-        if(!diagnosticRule) return;
+    assertExists(diagnosticRule);
 
-        assertExists(diagnosticRule);
+    if (!warning) return;
 
-        if(!warning)  return;
+    assert(
+      diagnosticRule.warnings.includes(warning),
+      `"${JSON.stringify(e.warnings)}" does not contain "${warning}"`,
+    );
 
-        assert(
-            diagnosticRule.warnings.includes(warning),
-            `"${JSON.stringify(e.warnings)}" does not contain "${warning}"`
-        );
+    return;
+  }
 
-
-        return;
-    }
-
-    assert(false, `no ${validatorName} detected`)
+  assert(false, `no ${validatorName} detected`);
 }

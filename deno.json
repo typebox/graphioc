@@ -12,5 +12,8 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
+  },
+  "fmt": {
+    "singleQuote": true
   }
 }
