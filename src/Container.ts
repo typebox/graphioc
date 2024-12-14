@@ -142,18 +142,26 @@ export class Container {
     const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
       [];
     try {
-      const parameters = paramTypes.map((param: Constructor<unknown>) =>
-        this.resolve(param)
-      );
+      const parameters = paramTypes.map((param: Constructor<unknown>) => {
+        try {
+          return this.resolve(param);
+        } catch (error) {
+          if (error instanceof Error) {
+            throw new Error(
+              `Failed to resolve parameter ${param.name}: ${error.message}`,
+            );
+          }
+          throw error;
+        }
+      });
       return new constructor(...parameters);
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(
           `Failed to create instance for ${constructor.name}: ${error.message}`,
         );
-      } else {
-        throw error;
       }
+      throw error;
     }
   }
 
