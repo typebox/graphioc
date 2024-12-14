@@ -37,7 +37,7 @@ export class lifestyleMismatch extends DiagnosticRule{
 
             if (this.isLifestyleMismatch(registration.lifestyle, depRegistration.lifestyle)) {
                 this.warnings.push(
-                    `Lifestyle mismatch detected: ${registration.implementation.name} (${registration.lifestyle}) depends on ` +
+                    `${registration.implementation.name} (${registration.lifestyle}) depends on ` +
                     `${depRegistration.implementation.name} (${depRegistration.lifestyle})`
                 );
             }

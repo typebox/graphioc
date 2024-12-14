@@ -1,9 +1,8 @@
-import { Container, Injectable, LifeStyles } from "../../src/mod.ts";
+import { Container, LifeStyles } from "../../src/mod.ts";
 import { assertValidationWarning } from "./assertValidationWarning.ts";
 
 
 Deno.test("Diagnostics for AmbiguousLifestyles", () => {
-    @Injectable()
     class AmbiguousService {}
 
     // Registration with different lifestyles

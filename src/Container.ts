@@ -134,7 +134,7 @@ export class Container {
     }
 }
 
-class ScopedContainer extends Container {
+export class ScopedContainer extends Container {
     private scopedInstances = new Map<Constructor<unknown>, unknown>();
 
     constructor(private superContainer: Container) {

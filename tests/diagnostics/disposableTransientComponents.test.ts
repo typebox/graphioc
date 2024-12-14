@@ -1,10 +1,9 @@
-import {Container, Injectable, LifeStyles} from "../../src/Container.ts";
-import {assertValidationWarning} from "./assertValidationWarning.ts";
+import {Container, LifeStyles} from '../../src/Container.ts';
+import {assertValidationWarning} from './assertValidationWarning.ts';
 
-Deno.test("Diagnostics for DisposableTransientComponents", () => {
-    @Injectable()
+Deno.test('Diagnostics for DisposableTransientComponents', () => {
     class DisposableTransientService {
-        dispose() {
+        [Symbol.dispose]() {
             // Dispose resources
         }
     }
@@ -14,7 +13,7 @@ Deno.test("Diagnostics for DisposableTransientComponents", () => {
     container.register(DisposableTransientService, LifeStyles.Transient);
 
     // Act & Assert
-    const warning = "DisposableTransientService is transient and implements a dispose method";
-    const validatorName = "DisposableTransientComponents";
+    const warning = 'DisposableTransientService is transient and also implements a dispose method';
+    const validatorName = 'DisposableTransientComponents';
     assertValidationWarning(container, validatorName, warning);
 });

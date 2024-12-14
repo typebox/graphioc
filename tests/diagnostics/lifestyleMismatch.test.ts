@@ -4,9 +4,8 @@ import {assertValidationWarning} from "./assertValidationWarning.ts";
 
 Deno.test("Diagnostics for LifestyleMismatch", () => {
     //Assign
-    @Injectable()
     class Foo {}
-    @Injectable()
+
     class Bah {
         constructor(public foo: Foo) {}
     }

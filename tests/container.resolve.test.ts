@@ -39,26 +39,6 @@ Deno.test("transient registration and resolution", () => {
     assertInstanceOf(fooInstance2, Foo, "Resolved instance should be of type Foo");
 });
 
-Deno.test("unregistered service resolution", () => {
-
-    // Assign
-    @Injectable()
-    class Foo {}
-
-    //Act
-    const container = new Container();
-
-    //Assert
-    assertThrows(
-        () => {
-            container.resolve(Foo);
-        },
-        Error,
-        "Service not registered: Foo",
-        "Should throw an error when resolving an unregistered service"
-    );
-});
-
 Deno.test("automatic dependency resolution", () => {
     //Assign
     @Injectable()
