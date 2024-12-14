@@ -141,10 +141,20 @@ export class Container {
   protected createInstance<T>(constructor: Constructor<T>): T {
     const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
       [];
-    const parameters = paramTypes.map((param: Constructor<unknown>) =>
-      this.resolve(param)
-    );
-    return new constructor(...parameters);
+    try {
+      const parameters = paramTypes.map((param: Constructor<unknown>) =>
+        this.resolve(param)
+      );
+      return new constructor(...parameters);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(
+          `Failed to create instance for ${constructor.name}: ${error.message}`,
+        );
+      } else {
+        throw error;
+      }
+    }
   }
 
   resolveAll<T>(i: symbol): T[] {
