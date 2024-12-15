@@ -173,7 +173,8 @@ export class Container {
         return newRegistration;
       }
 
-      const errorStack = new Error().stack?.split('\n').slice(1).join('\n') ||
+      const errorStack =
+        new Error().stack?.split(/\r?\n/).slice(1).join('\n') ||
         'Stack not available';
       throw new Error(
         `Service not registered: ${constructor.name}. ` +
