@@ -30,6 +30,9 @@ export interface Registration<T> {
 }
 
 export class Container {
+  // Shared dependency cache for all resolutions
+  private readonly dependencyCache = new Map<Constructor<unknown>, unknown>();
+
   //tracks the registrations into the container mainly to know what the lifestyle
   private readonly registrations = new Map<
     Constructor<unknown>,
@@ -181,14 +184,13 @@ export class Container {
   protected createInstance<T>(constructor: Constructor<T>): T {
     const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
       [];
-    const dependencyCache = new Map<Constructor<unknown>, unknown>();
 
     try {
       const parameters = paramTypes.map((param: Constructor<unknown>) => {
-        if (!dependencyCache.has(param)) {
+        if (!this.dependencyCache.has(param)) {
           try {
             const resolvedParam = this.resolve(param);
-            dependencyCache.set(param, resolvedParam);
+            this.dependencyCache.set(param, resolvedParam);
             return resolvedParam;
           } catch (error) {
             if (error instanceof Error) {
@@ -199,7 +201,7 @@ export class Container {
             throw error;
           }
         }
-        return dependencyCache.get(param);
+        return this.dependencyCache.get(param);
       });
       return new constructor(...parameters);
     } catch (error) {
