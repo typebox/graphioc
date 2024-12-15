@@ -102,9 +102,19 @@ export class Container {
     this.ambiguousLifestyles.trackRegistration(implementation, lifestyle);
     this.registrations.set(implementation, { implementation, lifestyle });
 
-    const interfaces: symbol[] =
+    const interfaces: unknown =
       Reflect.getMetadata(metadata_contacts_key, implementation) || [];
-    interfaces.forEach((i) => {
+
+    if (
+      !Array.isArray(interfaces) ||
+      !interfaces.every((i) => typeof i === 'symbol')
+    ) {
+      throw new Error(
+        `Invalid metadata for implementation ${implementation.name}. Expected an array of symbols.`,
+      );
+    }
+
+    (interfaces as symbol[]).forEach((i) => {
       if (!this.interfaceMap.has(i)) {
         this.interfaceMap.set(i, []);
       }
