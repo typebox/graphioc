@@ -156,11 +156,11 @@ export class Container {
         return newRegistration;
       }
 
+      const errorStack = new Error().stack?.split('\n').slice(1).join('\n') ||
+        'Stack not available';
       throw new Error(
         `Service not registered: ${constructor.name}. ` +
-          `Ensure the service is registered before resolving. Caller: ${
-            new Error().stack
-          }`,
+          `Ensure the service is registered before resolving. Caller stack trace: \n${errorStack}`,
       );
     }
 
