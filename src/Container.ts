@@ -73,14 +73,25 @@ export class Container {
     const diagnosticRulesWithWarnings: DiagnosticRule[] = [];
 
     for (const rule of this.diagnosticRules) {
-      rule.Verify();
-      if (rule.warnings.length > 0) {
-        diagnosticRulesWithWarnings.push(rule);
+      try {
+        rule.Verify();
+        if (rule.warnings.length > 0) {
+          diagnosticRulesWithWarnings.push(rule);
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          rule.warnings.push(error.message);
+          diagnosticRulesWithWarnings.push(rule);
+          continue;
+        }
+        throw error;
       }
     }
 
     if (diagnosticRulesWithWarnings.length > 0) {
-      throw new VerificationError(diagnosticRulesWithWarnings);
+      throw new VerificationError(
+        diagnosticRulesWithWarnings,
+      );
     }
   }
 
