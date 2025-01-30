@@ -1,4 +1,4 @@
-import { assert, assertInstanceOf } from 'jsr:@std/assert';
+import { assert, assertInstanceOf, assertThrows } from 'jsr:@std/assert';
 import { Container, Injectable, LifeStyles } from '../src/Container.ts';
 
 Deno.test('singleton registration and resolution', () => {

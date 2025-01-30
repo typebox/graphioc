@@ -1,12 +1,13 @@
-import type { DiagnosticRule } from './diagnostics/DiagnosticRule.ts';
-import { Reflect } from '@dx/reflect';
-import { lifestyleMismatch } from './diagnostics/LifestyleMismatch.ts';
-import { UnregisteredDependencies } from './diagnostics/UnregisteredDependencies.ts';
-import { DisposableTransientComponents } from './diagnostics/DisposableTransientComponents.ts';
-import { ShortCircuitedDependencies } from './diagnostics/ShortCircuitedDependencies.ts';
-import { TornLifestyles } from './diagnostics/TornLifestyles.ts';
-import { AmbiguousLifestyles } from './diagnostics/AmbiguousLifestyles.ts';
-import { VerificationError } from './diagnostics/VerificationError.ts';
+import type {DiagnosticRule} from './diagnostics/DiagnosticRule.ts';
+import {Reflect} from '@dx/reflect';
+import {lifestyleMismatch} from './diagnostics/LifestyleMismatch.ts';
+import {UnregisteredDependencies} from './diagnostics/UnregisteredDependencies.ts';
+import {DisposableTransientComponents} from './diagnostics/DisposableTransientComponents.ts';
+import {ShortCircuitedDependencies} from './diagnostics/ShortCircuitedDependencies.ts';
+import {TornLifestyles} from './diagnostics/TornLifestyles.ts';
+import {AmbiguousLifestyles} from './diagnostics/AmbiguousLifestyles.ts';
+import {VerificationError} from './diagnostics/VerificationError.ts';
+import {CircularDependencyRule} from "./diagnostics/CircularDependencyRule.ts";
 
 // Using "any" here is justified to allow flexibility for any constructor.
 // deno-lint-ignore no-explicit-any
@@ -25,30 +26,27 @@ export const LifeStyles = {
 // Type for the lifecycle values.
 export type LifeStyleType = (typeof LifeStyles)[keyof typeof LifeStyles];
 
+// Interface for disposable services
+export interface Disposable {
+  [Symbol.dispose](): void;
+}
+
 // Structure to represent a registration in the container.
 export interface Registration<T> {
-  implementation: Constructor<T>; // The class constructor being registered.
-  lifestyle: LifeStyleType; // The lifecycle type (e.g., Singleton, Transient).
-  instance?: T; // The resolved instance, if applicable.
+  implementation: Constructor<T>;
+  lifestyle: LifeStyleType;
+  instance?: T;
 }
 
 export class Container {
-  // Cache to store shared dependencies for reuse.
-  private readonly dependencyCache = new Map<Constructor<unknown>, unknown>();
 
-  // Map of all registered constructors to their registration details.
   private readonly registrations = new Map<
     Constructor<unknown>,
     Registration<unknown>
   >();
-
-  // Map interfaces (symbols) to their concrete implementations.
   private readonly interfaceMap = new Map<symbol, Constructor<unknown>[]>();
 
-  // Diagnostic rules applied to the container to verify correctness.
   private readonly diagnosticRules: DiagnosticRule[] = [];
-
-  // Specific diagnostic rule instances.
   private readonly lifestyleMismatch = new lifestyleMismatch(
     this.registrations,
   );
@@ -65,9 +63,13 @@ export class Container {
   private readonly unregisteredDependencies = new UnregisteredDependencies(
     this.registrations,
   );
+  private readonly circularDependencyRule = new CircularDependencyRule(
+      this.registrations
+  );
+
+  protected readonly scopedContainers: Set<ScopedContainer> = new Set();
 
   constructor() {
-    // Initialize diagnostic rules to validate container state.
     this.diagnosticRules = [
       this.lifestyleMismatch,
       this.shortCircuitedDependencies,
@@ -75,10 +77,10 @@ export class Container {
       this.ambiguousLifestyles,
       this.disposableTransientComponents,
       this.unregisteredDependencies,
+      this.circularDependencyRule
     ];
   }
 
-  // Verify the container's state using diagnostic rules.
   Verify() {
     const diagnosticRulesWithWarnings: DiagnosticRule[] = [];
 
@@ -95,14 +97,12 @@ export class Container {
           diagnosticRulesWithWarnings.push(rule);
           continue;
         }
-        throw error; // Re-throw unexpected errors.
+        throw error;
       }
     }
 
     if (diagnosticRulesWithWarnings.length > 0) {
-      throw new VerificationError(
-        diagnosticRulesWithWarnings,
-      );
+      throw new VerificationError(diagnosticRulesWithWarnings);
     }
   }
 
@@ -118,7 +118,6 @@ export class Container {
     // Retrieve interface metadata for the implementation.
     const interfaces: unknown =
       Reflect.getMetadata(metadata_contacts_key, implementation) || [];
-
     if (
       !Array.isArray(interfaces) ||
       !interfaces.every((i) => typeof i === 'symbol')
@@ -169,7 +168,6 @@ export class Container {
           implementation: constructor,
         };
         this.registrations.set(constructor, newRegistration);
-
         return newRegistration;
       }
 
@@ -202,37 +200,9 @@ export class Container {
 
   // Create an instance of a constructor with resolved dependencies.
   protected createInstance<T>(constructor: Constructor<T>): T {
-    const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
-      [];
-
-    try {
-      // Resolve dependencies for the constructor.
-      const parameters = paramTypes.map((param: Constructor<unknown>) => {
-        if (!this.dependencyCache.has(param)) {
-          try {
-            const resolvedParam = this.resolve(param);
-            this.dependencyCache.set(param, resolvedParam);
-            return resolvedParam;
-          } catch (error) {
-            if (error instanceof Error) {
-              throw new Error(
-                `Failed to resolve parameter ${param.name}: ${error.message}`,
-              );
-            }
-            throw error;
-          }
-        }
-        return this.dependencyCache.get(param);
-      });
-      return new constructor(...parameters);
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(
-          `Failed to create instance for ${constructor.name}: ${error.message}`,
-        );
-      }
-      throw error; // Re-throw unexpected errors.
-    }
+    const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) || [];
+    const parameters = paramTypes.map((param: Constructor<unknown>) => this.resolve(param));
+    return new constructor(...parameters);
   }
 
   // Resolve all implementations registered for a specific interface.
@@ -243,7 +213,38 @@ export class Container {
 
   // Create a scoped container for managing scoped instances.
   createScope(): Container {
-    return new ScopedContainer(this);
+    const scopedContainer = new ScopedContainer(this);
+    this.scopedContainers.add(scopedContainer);
+    return scopedContainer;
+  }
+
+  removeScope(scopedContainer: ScopedContainer): void {
+    this.scopedContainers.delete(scopedContainer);
+  }
+
+  // Dispose method using Symbol.dispose
+  dispose(): void {
+    // Dispose all child scoped containers
+    for (const scopedContainer of this.scopedContainers) {
+      scopedContainer.dispose();
+    }
+    this.scopedContainers.clear();
+
+    for (const [_, instance] of this.registrations) {
+      if (
+        instance.instance &&
+        typeof (instance.instance as Disposable)[Symbol.dispose] === 'function'
+      ) {
+        try {
+          (instance.instance as Disposable)[Symbol.dispose]();
+        } catch (error) {
+          console.warn(`Error disposing instance: ${error}`);
+        }
+      }
+    }
+
+    this.registrations.clear();
+    this.interfaceMap.clear();
   }
 }
 
@@ -271,6 +272,24 @@ export class ScopedContainer extends Container {
       }
       return this.scopedInstances.get(constructor) as T;
     }
+  }
+
+  override dispose(): void {
+    for (const [_, instance] of this.scopedInstances) {
+      if (
+        instance &&
+        typeof (instance as Disposable)[Symbol.dispose] === 'function'
+      ) {
+        try {
+          (instance as Disposable)[Symbol.dispose]();
+        } catch (error) {
+          console.warn(`Error disposing scoped instance: ${error}`);
+        }
+      }
+    }
+
+    this.scopedInstances.clear();
+    super.removeScope(this);
   }
 }
 

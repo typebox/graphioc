@@ -107,3 +107,55 @@ Deno.test('Scoped registration should be act as Singleton within container but n
     'Scoped should return different instance from parent scoped container',
   );
 });
+
+Deno.test('Scoped container should not recursively call dispose infinitely', () => {
+  // Arrange
+  let disposeCalled = 0;
+
+  @Injectable()
+  class DisposableService {
+    [Symbol.dispose]() {
+      disposeCalled++;
+    }
+  }
+
+  const parentContainer = new Container();
+  parentContainer.register(DisposableService, LifeStyles.Scoped);
+
+  const scopedContainer = parentContainer.createScope();
+  scopedContainer.resolve(DisposableService);
+
+  // Act
+  scopedContainer.dispose();
+  parentContainer.dispose(); // If there's a recursive call, this will cause a stack overflow or incorrect behavior
+
+  // Assert
+  assertEquals(disposeCalled, 1, 'Scoped service should be disposed exactly once');
+});
+
+Deno.test('Scoped instances should not persist after parent container disposal', () => {
+  // Arrange
+  let disposeCalled = 0;
+
+  @Injectable()
+  class DisposableService {
+    [Symbol.dispose]() {
+      disposeCalled++;
+    }
+  }
+
+  const container = new Container();
+  container.register(DisposableService, LifeStyles.Scoped);
+
+  const scopedContainer1 = container.createScope();
+  const scopedContainer2 = container.createScope();
+
+  scopedContainer1.resolve(DisposableService);
+  scopedContainer2.resolve(DisposableService);
+
+  // Act
+  container.dispose(); // Should clean up everything, including scoped instances
+
+  // Assert
+  assertEquals(disposeCalled, 2, 'Both scoped instances should be disposed when parent is disposed');
+});
