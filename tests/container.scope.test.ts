@@ -1,7 +1,7 @@
-import { assert, assertEquals, assertInstanceOf } from 'jsr:@std/assert';
-import { Container, Injectable, LifeStyles } from '../src/Container.ts';
+import { assert, assertEquals, assertInstanceOf } from "jsr:@std/assert";
+import { Container, Injectable, LifeStyles } from "../src/Container.ts";
 
-Deno.test('Scoped Container and parent container are different', () => {
+Deno.test("Scoped Container and parent container are different", () => {
   //Assign
   const container = new Container();
 
@@ -11,11 +11,11 @@ Deno.test('Scoped Container and parent container are different', () => {
   //Assert
   assert(
     scopedContainer !== container,
-    'Transient should return different instances',
+    "Transient should return different instances",
   );
 });
 
-Deno.test('Singleton registration and resolution same instance between parent and scoped container', () => {
+Deno.test("Singleton registration and resolution same instance between parent and scoped container", () => {
   //Assign
   @Injectable()
   class Bar {}
@@ -33,16 +33,16 @@ Deno.test('Singleton registration and resolution same instance between parent an
   assertEquals(
     barInstance1,
     barInstance2,
-    'Singleton should return the same instance',
+    "Singleton should return the same instance",
   );
   assertInstanceOf(
     barInstance1,
     Bar,
-    'Resolved instance should be of type Bar',
+    "Resolved instance should be of type Bar",
   );
 });
 
-Deno.test('Scoped registration and resolution different instance between parent and scoped container', () => {
+Deno.test("Scoped registration and resolution different instance between parent and scoped container", () => {
   //Assign
   @Injectable()
   class Bar {}
@@ -59,21 +59,21 @@ Deno.test('Scoped registration and resolution different instance between parent 
   //Assert
   assert(
     barInstance_container !== barInstance_scopedContainer,
-    'Scoped should return different instances between containers',
+    "Scoped should return different instances between containers",
   );
   assertInstanceOf(
     barInstance_container,
     Bar,
-    'Resolved instance from parent container should be of type Bar',
+    "Resolved instance from parent container should be of type Bar",
   );
   assertInstanceOf(
     barInstance_scopedContainer,
     Bar,
-    'Resolved instance from scoped container should be of type Bar',
+    "Resolved instance from scoped container should be of type Bar",
   );
 });
 
-Deno.test('Scoped registration should be act as Singleton within container but not between them', () => {
+Deno.test("Scoped registration should be act as Singleton within container but not between them", () => {
   //Assign
   @Injectable()
   class Bar {}
@@ -92,23 +92,23 @@ Deno.test('Scoped registration should be act as Singleton within container but n
   //Assert
   assert(
     barInstance_container1 === barInstance_container2,
-    'Scoped should return the same instance from parent container',
+    "Scoped should return the same instance from parent container",
   );
   assert(
     barInstance_scopedContainer1 === barInstance_scopedContainer2,
-    'Scoped should return the same instance from parent scoped container',
+    "Scoped should return the same instance from parent scoped container",
   );
   assert(
     barInstance_container1 !== barInstance_scopedContainer1,
-    'Scoped should return different instance from parent container',
+    "Scoped should return different instance from parent container",
   );
   assert(
     barInstance_container2 !== barInstance_scopedContainer2,
-    'Scoped should return different instance from parent scoped container',
+    "Scoped should return different instance from parent scoped container",
   );
 });
 
-Deno.test('Scoped container should not recursively call dispose infinitely', () => {
+Deno.test("Scoped container should not recursively call dispose infinitely", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -130,10 +130,14 @@ Deno.test('Scoped container should not recursively call dispose infinitely', () 
   parentContainer.dispose(); // If there's a recursive call, this will cause a stack overflow or incorrect behavior
 
   // Assert
-  assertEquals(disposeCalled, 1, 'Scoped service should be disposed exactly once');
+  assertEquals(
+    disposeCalled,
+    1,
+    "Scoped service should be disposed exactly once",
+  );
 });
 
-Deno.test('Scoped instances should not persist after parent container disposal', () => {
+Deno.test("Scoped instances should not persist after parent container disposal", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -157,5 +161,9 @@ Deno.test('Scoped instances should not persist after parent container disposal',
   container.dispose(); // Should clean up everything, including scoped instances
 
   // Assert
-  assertEquals(disposeCalled, 2, 'Both scoped instances should be disposed when parent is disposed');
+  assertEquals(
+    disposeCalled,
+    2,
+    "Both scoped instances should be disposed when parent is disposed",
+  );
 });

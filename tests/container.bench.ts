@@ -1,4 +1,4 @@
-import { Container, Injectable, LifeStyles } from '../src/Container.ts';
+import { Container, Injectable, LifeStyles } from "../src/Container.ts";
 
 // Stress testing container with multiple dependencies
 @Injectable()
@@ -37,10 +37,12 @@ transientContainer.register(Bar, LifeStyles.Transient);
 transientContainer.register(Baz, LifeStyles.Transient);
 transientContainer.register(Qux, LifeStyles.Transient);
 
-Deno.bench('stress test for Transient services', {
-  group: 'LifeStyles Transient vs Singleton',
+Deno.bench("stress test for Transient services", {
+  group: "LifeStyles Transient vs Singleton",
 }, async () => {
-  await Promise.all(Array.from({ length: 1000 }, () => transientContainer.resolve(Foo)));
+  await Promise.all(
+    Array.from({ length: 1000 }, () => transientContainer.resolve(Foo)),
+  );
 });
 
 const singletonContainer = new Container();
@@ -51,10 +53,12 @@ singletonContainer.register(Bar, LifeStyles.Singleton);
 singletonContainer.register(Baz, LifeStyles.Singleton);
 singletonContainer.register(Qux, LifeStyles.Singleton);
 
-Deno.bench('stress test for Singleton services', {
-  group: 'LifeStyles Transient vs Singleton',
+Deno.bench("stress test for Singleton services", {
+  group: "LifeStyles Transient vs Singleton",
 }, async () => {
-  await Promise.all(Array.from({ length: 1000 }, () => singletonContainer.resolve(Foo)));
+  await Promise.all(
+    Array.from({ length: 1000 }, () => singletonContainer.resolve(Foo)),
+  );
 });
 
 const parentContainer = new Container();
@@ -65,26 +69,29 @@ parentContainer.register(Bar, LifeStyles.Scoped);
 parentContainer.register(Baz, LifeStyles.Scoped);
 parentContainer.register(Qux, LifeStyles.Scoped);
 
-Deno.bench('stress test for Scoped services from parent container', {
-  group: 'parent vs scoped container',
+Deno.bench("stress test for Scoped services from parent container", {
+  group: "parent vs scoped container",
 }, async () => {
-  await Promise.all(Array.from({ length: 1000 }, () => parentContainer.resolve(Foo)));
+  await Promise.all(
+    Array.from({ length: 1000 }, () => parentContainer.resolve(Foo)),
+  );
 });
 
 const scopedContainer = parentContainer.createScope();
-Deno.bench('stress test for Scoped services from scoped container', {
-  group: 'parent vs scoped container',
+Deno.bench("stress test for Scoped services from scoped container", {
+  group: "parent vs scoped container",
 }, async () => {
-  await Promise.all(Array.from({ length: 1000 }, () => scopedContainer.resolve(Foo)));
+  await Promise.all(
+    Array.from({ length: 1000 }, () => scopedContainer.resolve(Foo)),
+  );
 });
 
-Deno.bench('stress test for creating container', async () => {
+Deno.bench("stress test for creating container", async () => {
   await Promise.all(Array.from({ length: 1000 }, () => new Container()));
 });
 
-Deno.bench('stress test for creating scoped container', async () => {
-  await Promise.all(Array.from({ length: 1000 }, () => parentContainer.createScope()));
+Deno.bench("stress test for creating scoped container", async () => {
+  await Promise.all(
+    Array.from({ length: 1000 }, () => parentContainer.createScope()),
+  );
 });
-
-
-

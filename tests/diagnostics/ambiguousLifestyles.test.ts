@@ -1,7 +1,7 @@
-import { Container, LifeStyles } from '../../src/mod.ts';
-import { assertValidationWarning } from './assertValidationWarning.ts';
+import { Container, LifeStyles } from "../../src/mod.ts";
+import { assertValidationWarning } from "./assertValidationWarning.ts";
 
-Deno.test('Diagnostics for AmbiguousLifestyles', () => {
+Deno.test("Diagnostics for AmbiguousLifestyles", () => {
   class AmbiguousService {}
 
   // Registration with different lifestyles
@@ -11,7 +11,7 @@ Deno.test('Diagnostics for AmbiguousLifestyles', () => {
 
   // Act & Assert
   const warning =
-    'AmbiguousService is registered with multiple lifestyles (Transient, Singleton)';
-  const validatorName = 'AmbiguousLifestyles';
+    "AmbiguousService is registered with multiple lifestyles (Transient, Singleton)";
+  const validatorName = "AmbiguousLifestyles";
   assertValidationWarning(container, validatorName, warning);
 });

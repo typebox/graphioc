@@ -1,26 +1,26 @@
-import type {DiagnosticRule} from './diagnostics/DiagnosticRule.ts';
-import {Reflect} from '@dx/reflect';
-import {lifestyleMismatch} from './diagnostics/LifestyleMismatch.ts';
-import {UnregisteredDependencies} from './diagnostics/UnregisteredDependencies.ts';
-import {DisposableTransientComponents} from './diagnostics/DisposableTransientComponents.ts';
-import {ShortCircuitedDependencies} from './diagnostics/ShortCircuitedDependencies.ts';
-import {TornLifestyles} from './diagnostics/TornLifestyles.ts';
-import {AmbiguousLifestyles} from './diagnostics/AmbiguousLifestyles.ts';
-import {VerificationError} from './diagnostics/VerificationError.ts';
-import {CircularDependencyRule} from "./diagnostics/CircularDependencyRule.ts";
+import type { DiagnosticRule } from "./diagnostics/DiagnosticRule.ts";
+import { Reflect } from "@dx/reflect";
+import { lifestyleMismatch } from "./diagnostics/LifestyleMismatch.ts";
+import { UnregisteredDependencies } from "./diagnostics/UnregisteredDependencies.ts";
+import { DisposableTransientComponents } from "./diagnostics/DisposableTransientComponents.ts";
+import { ShortCircuitedDependencies } from "./diagnostics/ShortCircuitedDependencies.ts";
+import { TornLifestyles } from "./diagnostics/TornLifestyles.ts";
+import { AmbiguousLifestyles } from "./diagnostics/AmbiguousLifestyles.ts";
+import { VerificationError } from "./diagnostics/VerificationError.ts";
+import { CircularDependencyRule } from "./diagnostics/CircularDependencyRule.ts";
 
 // Using "any" here is justified to allow flexibility for any constructor.
 // deno-lint-ignore no-explicit-any
 export type Constructor<T> = new (...args: any[]) => T;
 
-export const metadata_contacts_key = 'di:metadata:contacts';
-export const design_paramtypes = 'design:paramtypes';
+export const metadata_contacts_key = "di:metadata:contacts";
+export const design_paramtypes = "design:paramtypes";
 
 // Define lifecycle types for dependency registrations.
 export const LifeStyles = {
-  Singleton: 'Singleton',
-  Transient: 'Transient',
-  Scoped: 'Scoped',
+  Singleton: "Singleton",
+  Transient: "Transient",
+  Scoped: "Scoped",
 } as const;
 
 // Type for the lifecycle values.
@@ -39,7 +39,6 @@ export interface Registration<T> {
 }
 
 export class Container {
-
   private readonly registrations = new Map<
     Constructor<unknown>,
     Registration<unknown>
@@ -64,7 +63,7 @@ export class Container {
     this.registrations,
   );
   private readonly circularDependencyRule = new CircularDependencyRule(
-      this.registrations
+    this.registrations,
   );
 
   protected readonly scopedContainers: Set<ScopedContainer> = new Set();
@@ -77,7 +76,7 @@ export class Container {
       this.ambiguousLifestyles,
       this.disposableTransientComponents,
       this.unregisteredDependencies,
-      this.circularDependencyRule
+      this.circularDependencyRule,
     ];
   }
 
@@ -120,7 +119,7 @@ export class Container {
       Reflect.getMetadata(metadata_contacts_key, implementation) || [];
     if (
       !Array.isArray(interfaces) ||
-      !interfaces.every((i) => typeof i === 'symbol')
+      !interfaces.every((i) => typeof i === "symbol")
     ) {
       throw new Error(
         `Invalid metadata for implementation ${implementation.name}. Expected an array of symbols.`,
@@ -172,8 +171,8 @@ export class Container {
       }
 
       const errorStack =
-        new Error().stack?.split(/\r?\n/).slice(1).join('\n') ||
-        'Stack not available';
+        new Error().stack?.split(/\r?\n/).slice(1).join("\n") ||
+        "Stack not available";
       throw new Error(
         `Service not registered: ${constructor.name}. ` +
           `Ensure the service is registered before resolving. Caller stack trace: \n${errorStack}`,
@@ -200,8 +199,11 @@ export class Container {
 
   // Create an instance of a constructor with resolved dependencies.
   protected createInstance<T>(constructor: Constructor<T>): T {
-    const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) || [];
-    const parameters = paramTypes.map((param: Constructor<unknown>) => this.resolve(param));
+    const paramTypes = Reflect.getMetadata(design_paramtypes, constructor) ||
+      [];
+    const parameters = paramTypes.map((param: Constructor<unknown>) =>
+      this.resolve(param)
+    );
     return new constructor(...parameters);
   }
 
@@ -233,7 +235,7 @@ export class Container {
     for (const [_, instance] of this.registrations) {
       if (
         instance.instance &&
-        typeof (instance.instance as Disposable)[Symbol.dispose] === 'function'
+        typeof (instance.instance as Disposable)[Symbol.dispose] === "function"
       ) {
         try {
           (instance.instance as Disposable)[Symbol.dispose]();
@@ -278,7 +280,7 @@ export class ScopedContainer extends Container {
     for (const [_, instance] of this.scopedInstances) {
       if (
         instance &&
-        typeof (instance as Disposable)[Symbol.dispose] === 'function'
+        typeof (instance as Disposable)[Symbol.dispose] === "function"
       ) {
         try {
           (instance as Disposable)[Symbol.dispose]();

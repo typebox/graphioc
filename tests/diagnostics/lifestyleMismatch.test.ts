@@ -1,7 +1,7 @@
-import { Container, LifeStyles } from '../../src/Container.ts';
-import { assertValidationWarning } from './assertValidationWarning.ts';
+import { Container, LifeStyles } from "../../src/Container.ts";
+import { assertValidationWarning } from "./assertValidationWarning.ts";
 
-Deno.test('Diagnostics for LifestyleMismatch', () => {
+Deno.test("Diagnostics for LifestyleMismatch", () => {
   //Assign
   class Foo {}
 
@@ -14,7 +14,7 @@ Deno.test('Diagnostics for LifestyleMismatch', () => {
   container.register(Bah, LifeStyles.Singleton);
 
   // Act & Assert
-  const warning = 'Bah (Singleton) depends on Foo (Transient)';
-  const validatorName = 'LifestyleMismatch';
+  const warning = "Bah (Singleton) depends on Foo (Transient)";
+  const validatorName = "LifestyleMismatch";
   assertValidationWarning(container, validatorName, warning);
 });

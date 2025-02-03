@@ -1,5 +1,5 @@
-import type { Constructor, Registration } from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
+import type { Constructor, Registration } from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class ShortCircuitedDependencies extends DiagnosticRule {
   constructor(
@@ -8,9 +8,9 @@ export class ShortCircuitedDependencies extends DiagnosticRule {
     super();
   }
 
-  name: string = 'ShortCircuitedDependencies';
+  name: string = "ShortCircuitedDependencies";
   description: string =
-    'Detects dependencies that are not properly injected and are being replaced with a default or null value.';
+    "Detects dependencies that are not properly injected and are being replaced with a default or null value.";
 
   visited = new Set<Constructor<unknown>>();
 

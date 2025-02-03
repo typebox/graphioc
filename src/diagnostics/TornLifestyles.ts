@@ -3,8 +3,8 @@ import {
   type Container,
   LifeStyles,
   type Registration,
-} from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
+} from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class TornLifestyles extends DiagnosticRule {
   constructor(
@@ -14,9 +14,9 @@ export class TornLifestyles extends DiagnosticRule {
     super();
   }
 
-  name: string = 'TornLifestyles';
+  name: string = "TornLifestyles";
   description: string =
-    'Detects when multiple instances of a singleton or scoped service are created.';
+    "Detects when multiple instances of a singleton or scoped service are created.";
 
   Verify() {
     // Group registrations by implementation and lifestyle

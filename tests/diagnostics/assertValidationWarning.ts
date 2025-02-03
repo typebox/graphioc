@@ -1,7 +1,7 @@
-import { assertInstanceOf } from '@std/assert';
-import type { Container } from '../../src/Container.ts';
-import { VerificationError } from '../../src/diagnostics/VerificationError.ts';
-import { assert, assertExists } from '@std/assert';
+import { assertInstanceOf } from "@std/assert";
+import type { Container } from "../../src/Container.ts";
+import { VerificationError } from "../../src/diagnostics/VerificationError.ts";
+import { assert, assertExists } from "@std/assert";
 
 export function assertValidationWarning(
   container: Container,

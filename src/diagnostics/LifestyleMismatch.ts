@@ -3,8 +3,8 @@ import {
   LifeStyles,
   type LifeStyleType,
   type Registration,
-} from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
+} from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class lifestyleMismatch extends DiagnosticRule {
   constructor(
@@ -76,7 +76,7 @@ export class lifestyleMismatch extends DiagnosticRule {
     return parentOrder > depOrder;
   }
 
-  name: string = 'LifestyleMismatch';
+  name: string = "LifestyleMismatch";
 
-  description: string = '';
+  description: string = "";
 }

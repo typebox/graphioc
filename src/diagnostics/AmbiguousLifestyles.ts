@@ -1,6 +1,6 @@
-import type { Constructor, LifeStyleType } from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
-import { LifeStyles } from '../Container.ts';
+import type { Constructor, LifeStyleType } from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
+import { LifeStyles } from "../Container.ts";
 
 export class AmbiguousLifestyles extends DiagnosticRule {
   private readonly registrationMap = new Map<
@@ -12,9 +12,9 @@ export class AmbiguousLifestyles extends DiagnosticRule {
     super();
   }
 
-  name: string = 'AmbiguousLifestyles';
+  name: string = "AmbiguousLifestyles";
   description: string =
-    'Detects services registered multiple times with different lifestyles.';
+    "Detects services registered multiple times with different lifestyles.";
 
   Verify() {
     for (const [implementation, lifestyles] of this.registrationMap.entries()) {
@@ -22,7 +22,7 @@ export class AmbiguousLifestyles extends DiagnosticRule {
         continue;
       }
 
-      const lifestylesString = Array.from(lifestyles).join(', ');
+      const lifestylesString = Array.from(lifestyles).join(", ");
       this.warnings.push(
         `${implementation.name} is registered with multiple lifestyles (${lifestylesString})`,
       );

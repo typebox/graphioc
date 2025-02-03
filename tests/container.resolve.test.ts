@@ -1,7 +1,7 @@
-import { assert, assertInstanceOf, assertThrows } from 'jsr:@std/assert';
-import { Container, Injectable, LifeStyles } from '../src/Container.ts';
+import { assert, assertInstanceOf, assertThrows } from "jsr:@std/assert";
+import { Container, Injectable, LifeStyles } from "../src/Container.ts";
 
-Deno.test('singleton registration and resolution', () => {
+Deno.test("singleton registration and resolution", () => {
   //Assign
   class Bar {}
 
@@ -15,16 +15,16 @@ Deno.test('singleton registration and resolution', () => {
   //Assert
   assert(
     barInstance1 === barInstance2,
-    'Singleton should return the same instance',
+    "Singleton should return the same instance",
   );
   assertInstanceOf(
     barInstance1,
     Bar,
-    'Resolved instance should be of type Bar',
+    "Resolved instance should be of type Bar",
   );
 });
 
-Deno.test('transient registration and resolution', () => {
+Deno.test("transient registration and resolution", () => {
   // Assign
   class Foo {}
 
@@ -38,21 +38,21 @@ Deno.test('transient registration and resolution', () => {
   //Assert
   assert(
     fooInstance1 !== fooInstance2,
-    'Transient should return different instances',
+    "Transient should return different instances",
   );
   assertInstanceOf(
     fooInstance1,
     Foo,
-    'Resolved instance should be of type Foo',
+    "Resolved instance should be of type Foo",
   );
   assertInstanceOf(
     fooInstance2,
     Foo,
-    'Resolved instance should be of type Foo',
+    "Resolved instance should be of type Foo",
   );
 });
 
-Deno.test('automatic dependency resolution', () => {
+Deno.test("automatic dependency resolution", () => {
   //Assign
   class Foo {}
   @Injectable()
@@ -68,15 +68,15 @@ Deno.test('automatic dependency resolution', () => {
   const bazInstance = container.resolve(Bah);
 
   //Assert
-  assertInstanceOf(bazInstance, Bah, 'Resolved instance should be of type Bah');
+  assertInstanceOf(bazInstance, Bah, "Resolved instance should be of type Bah");
   assertInstanceOf(
     bazInstance.foo,
     Foo,
-    'Bah should have a dependency of type Foo resolved automatically',
+    "Bah should have a dependency of type Foo resolved automatically",
   );
 });
 
-Deno.test('automatic dependency resolution of deep graph', () => {
+Deno.test("automatic dependency resolution of deep graph", () => {
   // Assign
   class Buzz {}
 
@@ -118,30 +118,30 @@ Deno.test('automatic dependency resolution of deep graph', () => {
   const quxInstance = container.resolve(Qux);
 
   // Assertions
-  assertInstanceOf(quxInstance, Qux, 'Resolved instance should be of type Qux');
+  assertInstanceOf(quxInstance, Qux, "Resolved instance should be of type Qux");
   assertInstanceOf(
     quxInstance.baz,
     Baz,
-    'Qux should have a dependency of type Baz resolved automatically',
+    "Qux should have a dependency of type Baz resolved automatically",
   );
   assertInstanceOf(
     quxInstance.baz.bar,
     Bar,
-    'Baz should have a dependency of type Bar resolved automatically',
+    "Baz should have a dependency of type Bar resolved automatically",
   );
   assertInstanceOf(
     quxInstance.baz.bar.bah,
     Bah,
-    'Bar should have a dependency of type Bah resolved automatically',
+    "Bar should have a dependency of type Bah resolved automatically",
   );
   assertInstanceOf(
     quxInstance.baz.bar.bah.foo,
     Foo,
-    'Bah should have a dependency of type Foo resolved automatically',
+    "Bah should have a dependency of type Foo resolved automatically",
   );
   assertInstanceOf(
     quxInstance.baz.bar.bah.foo.buzz,
     Buzz,
-    'Foo should have a dependency of type Buzz resolved automatically',
+    "Foo should have a dependency of type Buzz resolved automatically",
   );
 });

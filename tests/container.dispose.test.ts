@@ -1,8 +1,7 @@
-import { assertEquals, assert } from 'jsr:@std/assert';
-import { Container, Injectable, LifeStyles } from '../src/Container.ts';
+import { assert, assertEquals } from "jsr:@std/assert";
+import { Container, Injectable, LifeStyles } from "../src/Container.ts";
 
-
-Deno.test('Singleton instance should be disposed when container is disposed', () => {
+Deno.test("Singleton instance should be disposed when container is disposed", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -22,10 +21,10 @@ Deno.test('Singleton instance should be disposed when container is disposed', ()
   container.dispose();
 
   // Assert
-  assertEquals(disposeCalled, 1, 'Singleton should be disposed once');
+  assertEquals(disposeCalled, 1, "Singleton should be disposed once");
 });
 
-Deno.test('Scoped instance should be disposed when scoped container is disposed', () => {
+Deno.test("Scoped instance should be disposed when scoped container is disposed", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -46,10 +45,10 @@ Deno.test('Scoped instance should be disposed when scoped container is disposed'
   scopedContainer.dispose();
 
   // Assert
-  assertEquals(disposeCalled, 1, 'Scoped instance should be disposed once');
+  assertEquals(disposeCalled, 1, "Scoped instance should be disposed once");
 });
 
-Deno.test('Scoped instances should dispose when parent container disposes', () => {
+Deno.test("Scoped instances should dispose when parent container disposes", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -73,11 +72,11 @@ Deno.test('Scoped instances should dispose when parent container disposes', () =
   assertEquals(
     disposeCalled,
     1,
-    'Scoped instance should be disposed when parent container disposes',
+    "Scoped instance should be disposed when parent container disposes",
   );
 });
 
-Deno.test('Transient instances should not be stored and thus should not be disposed', () => {
+Deno.test("Transient instances should not be stored and thus should not be disposed", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -100,12 +99,11 @@ Deno.test('Transient instances should not be stored and thus should not be dispo
   assertEquals(
     disposeCalled,
     0,
-    'Transient instances should not be disposed since they are not stored',
+    "Transient instances should not be disposed since they are not stored",
   );
 });
 
-
-Deno.test('Disposing twice should not call Symbol.dispose multiple times', () => {
+Deno.test("Disposing twice should not call Symbol.dispose multiple times", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -126,10 +124,10 @@ Deno.test('Disposing twice should not call Symbol.dispose multiple times', () =>
   container.dispose(); // Calling twice
 
   // Assert
-  assertEquals(disposeCalled, 1, 'Dispose should be called only once');
+  assertEquals(disposeCalled, 1, "Dispose should be called only once");
 });
 
-Deno.test('Scoped instances should not be reused after scoped container disposal', () => {
+Deno.test("Scoped instances should not be reused after scoped container disposal", () => {
   // Arrange
   let disposeCalled = 0;
 
@@ -153,6 +151,6 @@ Deno.test('Scoped instances should not be reused after scoped container disposal
   const instance2 = scopedContainer2.resolve(DisposableService);
 
   // Assert
-  assert(instance1 !== instance2, 'New scoped instance should be created');
-  assertEquals(disposeCalled, 1, 'First scoped instance should be disposed');
+  assert(instance1 !== instance2, "New scoped instance should be created");
+  assertEquals(disposeCalled, 1, "First scoped instance should be disposed");
 });

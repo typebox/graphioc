@@ -1,9 +1,9 @@
-import { Container, Injectable, LifeStyles } from '../../src/Container.ts';
-import { assertValidationWarning } from './assertValidationWarning.ts';
+import { Container, Injectable, LifeStyles } from "../../src/Container.ts";
+import { assertValidationWarning } from "./assertValidationWarning.ts";
 
-Deno.test('Diagnostics for ShortCircuitedDependencies', () => {
+Deno.test("Diagnostics for ShortCircuitedDependencies", () => {
   // Assign
-  const IServiceB: unique symbol = Symbol('IServiceB');
+  const IServiceB: unique symbol = Symbol("IServiceB");
   // deno-lint-ignore no-empty-interface
   interface IServiceB {}
 
@@ -21,7 +21,7 @@ Deno.test('Diagnostics for ShortCircuitedDependencies', () => {
 
   // Act & Assert
   const warning =
-    'ServiceA (Transient) depends on ServiceB (Transient) instead of the registered abstraction IServiceB (Singleton)';
-  const validatorName = 'ShortCircuitedDependencies';
+    "ServiceA (Transient) depends on ServiceB (Transient) instead of the registered abstraction IServiceB (Singleton)";
+  const validatorName = "ShortCircuitedDependencies";
   assertValidationWarning(container, validatorName, warning);
 });

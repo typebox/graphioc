@@ -1,9 +1,9 @@
-import { assertEquals, assertInstanceOf } from 'jsr:@std/assert';
-import { Container, Injectable } from '../src/Container.ts';
+import { assertEquals, assertInstanceOf } from "jsr:@std/assert";
+import { Container, Injectable } from "../src/Container.ts";
 
-Deno.test('resolve all implementations of interface', () => {
+Deno.test("resolve all implementations of interface", () => {
   //Assign
-  const IBarSymbol: unique symbol = Symbol('IBar');
+  const IBarSymbol: unique symbol = Symbol("IBar");
 
   // deno-lint-ignore no-empty-interface
   interface IBar {}
@@ -24,23 +24,23 @@ Deno.test('resolve all implementations of interface', () => {
   assertEquals(
     barInstances.length,
     2,
-    'Should resolve to two instances of IBar implementations',
+    "Should resolve to two instances of IBar implementations",
   );
   assertInstanceOf(
     barInstances[0],
     BarImpl1,
-    'First instance should be of type BarImpl1',
+    "First instance should be of type BarImpl1",
   );
   assertInstanceOf(
     barInstances[1],
     BarImpl2,
-    'Second instance should be of type BarImpl2',
+    "Second instance should be of type BarImpl2",
   );
 });
 
-Deno.test('resolve all implementations of abstract class', () => {
+Deno.test("resolve all implementations of abstract class", () => {
   //Assign
-  const BarSymbol: unique symbol = Symbol('Bar');
+  const BarSymbol: unique symbol = Symbol("Bar");
   abstract class Bar {}
 
   @Injectable(BarSymbol)
@@ -59,16 +59,16 @@ Deno.test('resolve all implementations of abstract class', () => {
   assertEquals(
     barInstances.length,
     2,
-    'Should resolve to two instances of IBar implementations',
+    "Should resolve to two instances of IBar implementations",
   );
   assertInstanceOf(
     barInstances[0],
     BarImpl1,
-    'First instance should be of type BarImpl1',
+    "First instance should be of type BarImpl1",
   );
   assertInstanceOf(
     barInstances[1],
     BarImpl2,
-    'Second instance should be of type BarImpl2',
+    "Second instance should be of type BarImpl2",
   );
 });

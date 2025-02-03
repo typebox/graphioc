@@ -2,8 +2,8 @@ import {
   type Constructor,
   LifeStyles,
   type Registration,
-} from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
+} from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class DisposableTransientComponents extends DiagnosticRule {
   constructor(
@@ -26,11 +26,11 @@ export class DisposableTransientComponents extends DiagnosticRule {
   }
 
   private isDisposable<T>(constructor: Constructor<T>): boolean {
-    return typeof constructor.prototype[Symbol.dispose] === 'function' ||
-      typeof constructor.prototype[Symbol.asyncDispose] === 'function';
+    return typeof constructor.prototype[Symbol.dispose] === "function" ||
+      typeof constructor.prototype[Symbol.asyncDispose] === "function";
   }
 
-  name: string = 'DisposableTransientComponents';
+  name: string = "DisposableTransientComponents";
   description: string =
     `Components that implement IDisposable typically require deterministic cleanup. 
 However, transient components, by design, are not automatically tracked or disposed. 

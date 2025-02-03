@@ -7,6 +7,6 @@ const container = new Container();
 container.register(Foo, LifeStyles.Transient);
 
 self.onmessage = () => {
-    container.resolve(Foo); // Simulate resolution
-    self.postMessage("done");
+  container.resolve(Foo); // Simulate resolution
+  self.postMessage("done");
 };

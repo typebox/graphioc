@@ -1,10 +1,10 @@
-import type { Constructor, Registration } from '../Container.ts';
-import { DiagnosticRule } from './DiagnosticRule.ts';
+import type { Constructor, Registration } from "../Container.ts";
+import { DiagnosticRule } from "./DiagnosticRule.ts";
 
 export class UnregisteredDependencies extends DiagnosticRule {
-  name: string = 'UnregisteredDependencies';
+  name: string = "UnregisteredDependencies";
   description: string =
-    'Detects dependencies that have not been registered in the container.';
+    "Detects dependencies that have not been registered in the container.";
   visited = new Set<Constructor<unknown>>();
 
   constructor(
